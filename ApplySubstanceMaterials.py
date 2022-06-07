@@ -1,10 +1,10 @@
 bl_info = {
 	# required
-	'name': 'Apply Substance Output Materials V6',
+	'name': 'Apply Substance Output Materials',
 	'blender': (3, 00, 0),
 	'category': 'Object',
 	# optional
-	'version': (1, 6, 0),
+	'version': (1, 6, 1),
 }
 
 import bpy
@@ -13,23 +13,11 @@ import glob
 from bpy.props import (StringProperty, PointerProperty)
 from bpy.types import (Panel, Operator,  AddonPreferences, PropertyGroup)
 
-#Restart of this project 01-06-2022
-#New goals
-	#Needs a UI
-	#Needs to be able to select from all possible reasonable textures to get correct file name (eg if file contain 'diffuse' or 'color' it is the colour input), without a lot
-		#of work outside of Blender correcting filenames etc.
-	#Use separate functions to avoid hard-to-follow script
-
-
 #----------	
-#pseudocode
-#1 Point the code towards the correct file folder
-#2 Obtain the object name and number of materials
-#3 for each material, check the folder for a corresponding texture, which must contain the material name
-#4 check all textures that have the *material* name, and also sort by texture type (normal, diffuse, etc.)
-#5 Build the necessary node trees, depending on object type
-####5.1 Label the nodes correctly
-####5.2 Layout the nodes nicely if possible (not badly overlapping)
+#To do:
+#0. Add PBR output materials to the relevant section below
+#1. Label the nodes correctly
+#2. Layout the nodes nicely if possible (not badly overlapping)
 #----------
 
 #Setting up the UI and registering the addon
@@ -47,8 +35,6 @@ class ApplySubstanceMaterialsUI(bpy.types.Panel):
 	bl_label = 'Apply Substance Outputs'
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
-	#bl_category = "Tools"
-	#%bl_context = "objectmode"
 
 	def draw(self, context):
 		layout = self.layout
@@ -57,17 +43,13 @@ class ApplySubstanceMaterialsUI(bpy.types.Panel):
 		col.prop(scn.my_tool, "path", text="")
 		layout.operator(RUNAPPLY_OT_func_1.bl_idname)
 
+#The main process
 class RUNAPPLY_OT_func_1(bpy.types.Operator):		
 	bl_idname = "runapply.func_1"
 	bl_label = "Apply Substance Textures"
 	def execute(self, context):
-		## The UI will let the user point to a directory containing the files, and will have a button to apply them.
-		## Maybe a button to set the max texture size for the object regardless of the actual texture size (a nice to have)
-
-
-
 		#----
-		#Directory currently as below; to be assigned via UI
+		#Use selects the directory using the folder selector. This is transferred to the script here.
 		myDir = bpy.data.scenes["Scene"].my_tool.path
 		print(myDir)
 		#-----
@@ -92,8 +74,7 @@ class RUNAPPLY_OT_func_1(bpy.types.Operator):
 			print(len(myFiles))
 
 		#----
-		#Establish how many materials the current object has and create a list of names#
-		#Number of materials
+		#Establish how many materials the current object has and create a list of names
 		num_mat = len(bpy.context.active_object.data.materials)
 		#Declare empty list to contain material names
 		materialsList = []
@@ -104,10 +85,8 @@ class RUNAPPLY_OT_func_1(bpy.types.Operator):
 			mat_name = bpy.context.object.active_material.name
 			materialsList.append(mat_name)
 			x = x + 1
-		#----
 
-		#----
-		#For each material, assign a texture to one of the types of texture (colour, normal, etc.). Not all materials will have all textures
+		#For each material, assign a texture to one of the types of texture (colour, normal, etc.). Not all materials will have all textures.
 		for i in range(len(materialsList)):
 			#This currentMaterial is the material name
 			bpy.context.object.active_material_index = i
@@ -120,8 +99,8 @@ class RUNAPPLY_OT_func_1(bpy.types.Operator):
 			#set texture type variables to empty string so they can be included/excluded as necessary
 			normal = colour = height = opacity = rough = emissive = metal = reflection = ""	
 			for j in range(len(textureList)):
-				#in the 'Normal' check the period in included to exclude the directx normal file
-				#need to do this list for PBR outputs too
+				#in the 'Normal' check the period is included to exclude the directx normal file
+				#need to do this list for PBR outputs too, and maybe others
 				if "Normal." in textureList[j]:
 					normal = textureList[j]
 				if "Base_Color" in textureList[j]:
