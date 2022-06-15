@@ -4,7 +4,7 @@ bl_info = {
 	'blender': (3, 00, 0),
 	'category': 'Object',
 	# optional
-	'version': (1, 6, 1),
+	'version': (1, 6, 2),
 }
 
 import bpy
@@ -99,23 +99,26 @@ class RUNAPPLY_OT_func_1(bpy.types.Operator):
 			#set texture type variables to empty string so they can be included/excluded as necessary
 			normal = colour = height = opacity = rough = emissive = metal = reflection = ""	
 			for j in range(len(textureList)):
-				#in the 'Normal' check the period is included to exclude the directx normal file
-				#need to do this list for PBR outputs too, and maybe others
+				#Period added after the key word to reduce chance of picking up a descriptive word from the name (e.g. metallic)
 				if "Normal." in textureList[j]:
 					normal = textureList[j]
-				if "Base_Color" in textureList[j]:
+				if "Base_Color." in textureList[j]:
 					colour = textureList[j]
-				if "Height" in textureList[j]:
+				if "BaseColor." in textureList[j]:
+					colour = textureList[j]
+				if "Height." in textureList[j]:
 					height = textureList[j]
-				if "Opacity" in textureList[j]:
+				if "Opacity." in textureList[j]:
 					opacity = textureList[j]
-				if "Roughness" in textureList[j]:
+				if "opacity." in textureList[j]:
+					opacity = textureList[j]
+				if "Roughness." in textureList[j]:
 					rough = textureList[j]
-				if "Emissive" in textureList[j]:
+				if "Emissive." in textureList[j]:
 					emissive = textureList[j]
-				if "Metallic" in textureList[j]:
+				if "Metallic." in textureList[j]:
 					metal = textureList[j]
-				if "Reflection" in textureList[j]:
+				if "Reflection." in textureList[j]:
 					reflection = textureList[j]
 			
 			# Use these textures to set up the node groups, based on whether the textures exist
